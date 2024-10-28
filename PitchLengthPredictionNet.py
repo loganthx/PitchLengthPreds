@@ -17,7 +17,7 @@ class Block(nn.Module):
 
 
 class Net(nn.Module):
-	def __init__(self, config, in_channels=3, block_channel_sequence=(8, 8, 8, 8), conv_kernel=3, pool_kernel=2):
+	def __init__(self, config, in_channels=3, block_channel_sequence=(5, 5, 5, 5), conv_kernel=2, pool_kernel=2):
 		super().__init__()
 		self.relu = nn.ReLU()
 		c, h, w = config['img_shape']
