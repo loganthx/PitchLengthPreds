@@ -66,16 +66,24 @@ else:
 		])	
 
 
+def r2_score(y_pred, y_true):
+	ss_res = torch.sum((y_true - y_pred) ** 2)
+	ss_tot = torch.sum((y_true - torch.mean(y_true)) ** 2)
+	r2 = 1 - ss_res / ss_tot
+	return r2.item()
+
 
 samples = get_samples()
 print(f"Len Samples: {len(samples)}")
 
-train_samples, test_samples = samples[:int(0.75*len(samples))], samples[int(0.75*len(samples)):]
-train_dataset, test_dataset = DataUtils.CustomDataset(train_samples, transforms=transform), DataUtils.CustomDataset(test_samples, transforms=transform)
+dataset = DataUtils.CustomDataset(samples, transforms=transform)
 
-train_dataloader = DataLoader(train_dataset, batch_size = config['batch_size'], shuffle=True, drop_last=True)
-test_dataloader = DataLoader(test_dataset, batch_size = config['batch_size'], shuffle=True, drop_last=True)
+#train_samples, test_samples = samples[:int(0.75*len(samples))], samples[int(0.75*len(samples)):]
+#train_dataset, test_dataset = DataUtils.CustomDataset(train_samples, transforms=transform), DataUtils.CustomDataset(test_samples, transforms=transform)
+
+#train_dataloader = DataLoader(train_dataset, batch_size = config['batch_size'], shuffle=True, drop_last=True)
+#test_dataloader = DataLoader(test_dataset, batch_size = config['batch_size'], shuffle=True, drop_last=True)
 net = Net(config=config, in_channels=1).to(config['device'])
 
-trainer = TrainUtils.Trainer(config=config, net=net, trainloader=train_dataloader, testloader=test_dataloader)
-trainer.train()
+trainer = TrainUtils.Trainer(config=config, net=net, score_helper_function=r2_score)
+trainer.cross_validation_train(dataset, n_splits=5)
